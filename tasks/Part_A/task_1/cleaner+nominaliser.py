@@ -1,0 +1,159 @@
+import csv
+import matplotlib.pyplot as plt
+
+
+def plot_distribution(numbers,title):
+    plt.hist(numbers, bins=10, color='blue', edgecolor='black', alpha=0.7)
+    plt.title('Distribution '+title)
+    plt.xlabel('Value')
+    plt.ylabel('Frequency')
+    plt.grid(True)
+    plt.show()
+
+
+def is_number(s):
+    try:
+        complex(s) # for int, long, float and complex
+    except ValueError:
+        return False
+
+    return True
+
+def has_non_digit_elements(str_list):
+    for element in str_list:
+        if not is_number(element) and element.strip()!="":
+            return True
+    return False
+
+def gather_field_ranges(head,entries):
+    sets=[set() for _ in range(len(head))]
+    for entry in entries:
+        for i,value in enumerate(entry):
+            sets[i].add(value)
+    return sets #list of sets containing possible values for each field
+
+def check_csv_structure(header,entries):
+    #print(len(header))
+    for i,entry in enumerate(entries):
+        #print(len(entry))
+        if len(entry)!=len(header):
+            print(i,entry)
+            return "error on entry: "+str(i)
+        
+    return True
+
+def load_to_memory(original_file_path):
+    # Initialize an empty list to store the data
+    data_2d_list = []
+
+    # Open the CSV file
+    with open(original_file_path, 'r', encoding="utf-8-sig", newline='') as csvfile:
+        # Create a CSV reader object
+        csv_reader = csv.reader(csvfile,delimiter=";")
+        
+        # Iterate over each row in the CSV file
+        for row in csv_reader:
+            # Append each row to the 2D list
+            data_2d_list.append(row)
+
+    
+    return data_2d_list # Return the resulting 2D list representing the dataset 
+
+
+### Init
+original_file_path = 'Project_Desc/clinical_dataset.csv'
+#original_file_path = 'tasks/Part_A/task_1/test.csv'
+dataset=load_to_memory(original_file_path=original_file_path)
+#print(dataset[1][0])
+header=dataset[0]
+entries=dataset[1:]
+### 
+
+### Diagnostics
+structure_test_result=check_csv_structure(header=header,entries=entries)
+if (structure_test_result!=True):
+    print(structure_test_result)
+    exit(1)
+###
+    
+### Nominalise
+    
+# find ranges for fields
+sets=gather_field_ranges(head=header,entries=entries)
+
+#find which fields are non numerical
+non_num_fields=[]
+for i,range_of_field in enumerate(sets):
+    if has_non_digit_elements(range_of_field):
+        print(header[i],range_of_field)
+        #print(i,header[i])
+        non_num_fields.append(i) #list of indexes corresponding to columns
+
+print(non_num_fields)
+
+#create nominalisation dicts
+
+nom_dicts=[ #list indexes correspond to columns
+    {"Frail":2,"Non frail":0,"Pre-frail":1},
+    {"M":-1,"F":+1},
+    {"No":0,"Yes":1},
+    {'Sees well':0, 'Sees moderately':1, 'Sees poorly':2},
+    {'Hears poorly':2, 'Hears well':0, 'Hears moderately':1},
+    {"No":0,"Yes":1},
+    {'<5 sec':0,'>5 sec':1},
+    {'FALSE':0, 'TRUE':1},
+    {"No":0,"Yes":1},
+    {"No":0,"Yes":1},
+    {"No":0,"Yes":1},
+    {"No":0,"Yes":1},
+    {'Permanent sleep problem':2, 'Occasional sleep problem':1, 'No sleep problem':0},
+    {"No":0,"Yes":1},
+    {"No":0,"Yes":1},
+    {"No":0,"Yes":1},
+    {"No":0,"Yes":1},
+    {'2 - Bad':1, '4 - Good':3, '5 - Excellent':4, '3 - Medium':2, '1 - Very bad':0},
+    {'2 - A little worse':1, '3 - About the same':2, '4 - A little better':3, '5 - A lot better':4, '1 - A lot worse':0},
+    {'No':0, '< 2 h per week':1, '> 5 h per week':3, '> 2 h and < 5 h per week':2},
+    {'Never smoked':0, 'Current smoker':2, 'Past smoker (stopped at least 6 months)':1},
+]
+
+#replace values
+new_entries=[]
+for entry in entries:
+    new_entries.append([])
+    for i,field in enumerate(entry):
+        if i in non_num_fields:
+            try:
+                new_entries[-1].append(nom_dicts[non_num_fields.index(i)][field]) #if existing value in dict then translate it according to dict
+            except:
+                new_entries[-1].append(None) #if existing value not in dict replace with None
+        else:
+            new_entries[-1].append(field) #if no nominalisation needed just add old value
+
+###new dataset nominalised
+            
+### Remove eronious values in columns other than those listed in non_num_fields which have been taken care of through the above dicts
+            
+#get distributions
+fields_distributions=[[] for _ in range(len(header))]
+for entry in new_entries:
+    for i,field in enumerate(entry):
+        if i not in non_num_fields:
+            try:
+                fields_distributions[i].append(float(field))
+            except:
+                #fields_distributions[i].append(None)
+                #print(field)
+                #ignore non float/int values
+                pass
+            
+            
+# we plot distributions to visualise outliers and produce thresholds for eronious values
+for i,distr in enumerate(fields_distributions):
+    
+    if i not in non_num_fields:
+        title=header[i]
+        plot_distribution(distr,title)
+
+
+    
