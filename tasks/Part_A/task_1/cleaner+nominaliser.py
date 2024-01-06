@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 
 def plot_distribution(numbers,title):
-    plt.hist(numbers, bins=10, color='blue', edgecolor='black', alpha=0.7)
+    plt.hist(numbers, bins=50, color='blue', edgecolor='black', alpha=0.7)
     plt.title('Distribution '+title)
     plt.xlabel('Value')
     plt.ylabel('Frequency')
@@ -85,11 +85,11 @@ sets=gather_field_ranges(head=header,entries=entries)
 non_num_fields=[]
 for i,range_of_field in enumerate(sets):
     if has_non_digit_elements(range_of_field):
-        print(header[i],range_of_field)
+        #print(header[i],range_of_field)
         #print(i,header[i])
         non_num_fields.append(i) #list of indexes corresponding to columns
 
-print(non_num_fields)
+#print(non_num_fields)
 
 #create nominalisation dicts
 
@@ -144,7 +144,7 @@ for entry in new_entries:
             except:
                 #fields_distributions[i].append(None)
                 #print(field)
-                #ignore non float/int values
+                #ignore non float/int values from the visualisation 
                 pass
             
             
@@ -153,7 +153,106 @@ for i,distr in enumerate(fields_distributions):
     
     if i not in non_num_fields:
         title=header[i]
-        plot_distribution(distr,title)
+        #print(i)
+        #plot_distribution(distr,title)
+
+# from visualy inspecting the distributions plotted we establish the following thresholds and comments, the thresholds are provided by examining the biggest non-outlying entry other than the outlying ones
+# the added "x" in front indicates that we will be capping the values because although outliers they do signify something, no "x" means we will be leaving them empty since they are clear mistakes and the errors do not carry value
+thresholds=[
+    None,
+    None,
+    None, ###but there are propably real but extreme outliers, maybe need to add log scale
+    "x<30", ### maybe 999 represents living in hospital, 2 entries
+    None,
+    "x<100", ###maybe the 999 represents inability to lift, 40+ entries are not mistakes
+    "x<100", ###maybe the 999 represents inability to get up, ~9 entries
+    "x<50",  ###maybe the 999 represents inability to run, ~6 entries
+    "x<30",  ###the 999 is propably just a mistake or inability to move in general, ~3 entries
+    "<30",  ###the 999 is propably just wrong/ clearly eronius
+    "<60",  ###the ~900 entry is physically impossible so clearly eronius
+    "<100", ###the 999 entry is clearly eronius
+    None,   ###there is one outlier but it is propably real
+    ">10",   ###the ~ -400 entry is clearly eronius
+    None,
+    None,
+    None,
+    None,
+    None,
+    None,
+    "<50",  ###don't know how to interpet those, propably eronius but 4 entries
+    "<200", ###don't know how to interpet those, propably eronius 2 entries
+    None,
+    "x<200", ###maybe not eronius , it may signify something 10+ entries. there are also outliers
+    "x<200", ###maybe not eronius , it may signify something 10+ entries. there are also outliers
+    None,
+    None,
+    None,
+    "x<100", ###maybe grandad is alcoholic
+    None,
+    None,
+    None,
+    None,
+    None
+]
 
 
-    
+
+#print(len(header)-len(non_num_fields))
+#print(len(thresholds))
+
+
+#cap or remove weird values and keep the rest as they are
+def clean_eronius_values(thresholds,non_num_fields,old_entries):
+    new_entries=[]
+    for entry in old_entries:
+        new_entries.append([])
+        thres_index=-1
+        for i,field in enumerate(entry):
+            if i not in non_num_fields:
+                try:
+                    test=float(field)
+                except:
+                    new_entries[-1].append(None) #if non numerical value then set it to None and pass
+                    continue
+                
+                thres_index+=1
+                threshold=thresholds[thres_index]
+                if threshold!= None:
+                    if "x" in threshold:
+                        threshold=threshold.replace("x","")
+                        #mode="cap"
+                        if "<" in threshold:
+                            threshold=float(threshold.replace("<",""))
+                            new_entries[-1].append(min(float(field),threshold))
+                        elif ">" in threshold:
+                            threshold=float(threshold.replace(">",""))
+                            new_entries[-1].append(max(float(field),threshold))
+                    elif "x" not in threshold:
+                        #mode="remove"
+                        if "<" in threshold:
+                            threshold=float(threshold.replace("<",""))
+                            new_entries[-1].append(float(field) if float(field)<threshold else threshold)
+                        elif ">" in threshold:
+                            threshold=float(threshold.replace(">",""))
+                            new_entries[-1].append(float(field) if float(field)>threshold else threshold)
+
+
+            else:
+                new_entries[-1].append(field) #if clearing is not needed just add old value
+    return new_entries
+
+new_entries=clean_eronius_values(thresholds,non_num_fields,new_entries)
+### entries cleaned and nominalised, filling empty spots is all it is left
+
+
+# checking results of the first 2 steps
+empty_counter=0
+for entry in new_entries:
+
+    for field in entry:
+        if str(field).strip()=="":
+            print('problem')
+        if field==None:
+            empty_counter+=1
+#print(empty_counter) #we count 742 empty spots out of 29700
+#print(len(new_entries)*len(header))
