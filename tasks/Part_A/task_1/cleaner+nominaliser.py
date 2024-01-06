@@ -89,7 +89,7 @@ for i,range_of_field in enumerate(sets):
         #print(i,header[i])
         non_num_fields.append(i) #list of indexes corresponding to columns
 
-#print(non_num_fields)
+#print(len(non_num_fields))
 
 #create nominalisation dicts
 
@@ -204,6 +204,7 @@ thresholds=[
 #cap or remove weird values and keep the rest as they are
 def clean_eronius_values(thresholds,non_num_fields,old_entries):
     new_entries=[]
+    print(len(old_entries[0]))
     for entry in old_entries:
         new_entries.append([])
         thres_index=-1
@@ -224,17 +225,19 @@ def clean_eronius_values(thresholds,non_num_fields,old_entries):
                         if "<" in threshold:
                             threshold=float(threshold.replace("<",""))
                             new_entries[-1].append(min(float(field),threshold))
-                        elif ">" in threshold:
+                        else:
                             threshold=float(threshold.replace(">",""))
                             new_entries[-1].append(max(float(field),threshold))
-                    elif "x" not in threshold:
+                    else:
                         #mode="remove"
                         if "<" in threshold:
                             threshold=float(threshold.replace("<",""))
                             new_entries[-1].append(float(field) if float(field)<threshold else threshold)
-                        elif ">" in threshold:
+                        else:
                             threshold=float(threshold.replace(">",""))
                             new_entries[-1].append(float(field) if float(field)>threshold else threshold)
+                else:
+                    new_entries[-1].append(field) #if clearing is not needed just add old value
 
 
             else:
@@ -247,6 +250,7 @@ new_entries=clean_eronius_values(thresholds,non_num_fields,new_entries)
 
 # checking results of the first 2 steps
 empty_counter=0
+#find missed empty spots and count accounted empty spots
 for entry in new_entries:
 
     for field in entry:
@@ -254,5 +258,27 @@ for entry in new_entries:
             print('problem')
         if field==None:
             empty_counter+=1
+#graph new distributions
+print(len(new_entries[55]))
+fields_distributions=[[] for _ in range(len(header))]
+for entry in new_entries:
+    for i,field in enumerate(entry):
+        if i not in non_num_fields:
+            try:
+                fields_distributions[i].append(float(field))
+            except:
+                #fields_distributions[i].append(None)
+                #print(field)
+                #ignore non float/int values from the visualisation 
+                pass
+            
+for i,distr in enumerate(fields_distributions):
+    
+    if i not in non_num_fields:
+        title=header[i]
+        print(i)
+        plot_distribution(distr,title)
 #print(empty_counter) #we count 742 empty spots out of 29700
 #print(len(new_entries)*len(header))
+        
+# TODO FIX CAPS
