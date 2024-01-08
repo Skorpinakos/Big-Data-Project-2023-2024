@@ -162,15 +162,15 @@ thresholds=[
     None,
     None,
     None, ###but there are propably real but extreme outliers, maybe need to add log scale
-    "x<30", ### maybe 999 represents living in hospital, 2 entries
+    "x<15", ### maybe 999 represents living in hospital, 2 entries
     None,
-    "x<100", ###maybe the 999 represents inability to lift, 40+ entries are not mistakes
-    "x<100", ###maybe the 999 represents inability to get up, ~9 entries
+    "x<55", ###maybe the 999 represents inability to lift, 40+ entries are not mistakes
+    "x<65", ###maybe the 999 represents inability to get up, ~9 entries
     "x<50",  ###maybe the 999 represents inability to run, ~6 entries
-    "x<30",  ###the 999 is propably just a mistake or inability to move in general, ~3 entries
-    "<30",  ###the 999 is propably just wrong/ clearly eronius
-    "<60",  ###the ~900 entry is physically impossible so clearly eronius
-    "<100", ###the 999 entry is clearly eronius
+    "x<7",  ###the 999 is propably just a mistake or inability to move in general, ~3 entries
+    "<5",  ###the 999 is propably just wrong/ clearly eronius
+    "<45",  ###the ~900 entry is physically impossible so clearly eronius
+    "<65", ###the 999 entry is clearly eronius
     None,   ###there is one outlier but it is propably real
     ">10",   ###the ~ -400 entry is clearly eronius
     None,
@@ -179,7 +179,7 @@ thresholds=[
     None,
     None,
     None,
-    "<50",  ###don't know how to interpet those, propably eronius but 4 entries
+    "<35",  ###don't know how to interpet those, propably eronius but 4 entries
     "<200", ###don't know how to interpet those, propably eronius 2 entries
     None,
     "x<200", ###maybe not eronius , it may signify something 10+ entries. there are also outliers
@@ -187,7 +187,7 @@ thresholds=[
     None,
     None,
     None,
-    "x<100", ###maybe grandad is alcoholic
+    "x<65", ###maybe grandad is alcoholic
     None,
     None,
     None,
@@ -204,20 +204,21 @@ thresholds=[
 #cap or remove weird values and keep the rest as they are
 def clean_eronius_values(thresholds,non_num_fields,old_entries):
     new_entries=[]
-    print(len(old_entries[0]))
+    #print(len(old_entries[0]))
     for entry in old_entries:
         new_entries.append([])
         thres_index=-1
         for i,field in enumerate(entry):
             if i not in non_num_fields:
+                thres_index+=1
+                threshold=thresholds[thres_index]
                 try:
                     test=float(field)
                 except:
                     new_entries[-1].append(None) #if non numerical value then set it to None and pass
                     continue
                 
-                thres_index+=1
-                threshold=thresholds[thres_index]
+
                 if threshold!= None:
                     if "x" in threshold:
                         threshold=threshold.replace("x","")
@@ -259,7 +260,7 @@ for entry in new_entries:
         if field==None:
             empty_counter+=1
 #graph new distributions
-print(len(new_entries[55]))
+#print(len(new_entries[55]))
 fields_distributions=[[] for _ in range(len(header))]
 for entry in new_entries:
     for i,field in enumerate(entry):
@@ -271,14 +272,29 @@ for entry in new_entries:
                 #print(field)
                 #ignore non float/int values from the visualisation 
                 pass
-            
+
+cnt=-1       
 for i,distr in enumerate(fields_distributions):
     
     if i not in non_num_fields:
+        cnt+=1
         title=header[i]
-        print(i)
-        plot_distribution(distr,title)
+        #print(cnt,thresholds[cnt])
+        #plot_distribution(distr,title)
 #print(empty_counter) #we count 742 empty spots out of 29700
 #print(len(new_entries)*len(header))
+
+#save cleaned dataset to csv
+def save_csv(header, data, filename):
+    with open(filename, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
         
-# TODO FIX CAPS
+        # Write the header
+        csv_writer.writerow(header)
+        
+        # Write the data, replacing None with an empty string
+        for row in data:
+            csv_writer.writerow(['' if cell is None else cell for cell in row])
+
+
+save_csv(header=header,data=new_entries,filename="tasks/Part_A/task_1/cleaned.csv")
