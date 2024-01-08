@@ -267,10 +267,13 @@ for entry in new_entries:
         if i not in non_num_fields:
             try:
                 fields_distributions[i].append(float(field))
+                #if float(field)==999:
+                    #print(header[i],'problem')
             except:
                 #fields_distributions[i].append(None)
                 #print(field)
                 #ignore non float/int values from the visualisation 
+                #print("problem",field)
                 pass
 
 cnt=-1       
@@ -280,7 +283,7 @@ for i,distr in enumerate(fields_distributions):
         cnt+=1
         title=header[i]
         #print(cnt,thresholds[cnt])
-        #plot_distribution(distr,title)
+        plot_distribution(distr,title)
 #print(empty_counter) #we count 742 empty spots out of 29700
 #print(len(new_entries)*len(header))
 
