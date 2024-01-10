@@ -251,14 +251,24 @@ new_entries=clean_eronius_values(thresholds,non_num_fields,new_entries)
 
 # checking results of the first 2 steps
 empty_counter=0
+empty_dict={}
 #find missed empty spots and count accounted empty spots
 for entry in new_entries:
 
-    for field in entry:
+    for i,field in enumerate(entry):
         if str(field).strip()=="":
             print('problem')
         if field==None:
             empty_counter+=1
+            try:
+                empty_dict[i]=empty_dict[i]+1
+            except:
+                empty_dict[i]=0
+#print fields with missing values
+for key in empty_dict.keys():
+    pass
+    #print(header[key],empty_dict[key],list(sets[key])[0:5])
+
 #graph new distributions
 #print(len(new_entries[55]))
 fields_distributions=[[] for _ in range(len(header))]
@@ -283,7 +293,7 @@ for i,distr in enumerate(fields_distributions):
         cnt+=1
         title=header[i]
         #print(cnt,thresholds[cnt])
-        plot_distribution(distr,title)
+        #plot_distribution(distr,title)
 #print(empty_counter) #we count 742 empty spots out of 29700
 #print(len(new_entries)*len(header))
 
