@@ -80,7 +80,7 @@ import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
-def train_neural_network(dataset, target_column_index, epochs=1000, batch_size=8):
+def train_neural_network(dataset, target_column_index, epochs=2000, batch_size=64):
     # Extract features and target variable
     features = np.array([row[:target_column_index] + row[target_column_index+1:] for row in dataset])
     target = np.array([row[target_column_index] for row in dataset])
@@ -95,7 +95,7 @@ def train_neural_network(dataset, target_column_index, epochs=1000, batch_size=8
 
     # Build a simple neural network model
     model = tf.keras.Sequential([
-        tf.keras.layers.Dense(256, activation='relu', input_shape=(features_train_scaled.shape[1],)),
+        tf.keras.layers.Dense(8192, activation='relu', input_shape=(features_train_scaled.shape[1],)),
         tf.keras.layers.Dense(1)
     ])
 
