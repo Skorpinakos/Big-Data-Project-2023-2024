@@ -168,7 +168,7 @@ fixed=fix_rows(problematic_entries)
     #print(i)
 
 final_dataset=fixed+full_entries
-final_dataset.sort(key=lambda x: x[0])
+final_dataset.sort(key=lambda x: float(x[0]))
 
 
 save_csv(header=header,data=final_dataset,filename="tasks/Part_A/task_1/cleaned_and_filled.csv")
