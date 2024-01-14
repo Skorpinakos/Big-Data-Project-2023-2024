@@ -1,10 +1,5 @@
 import csv 
 
-import Levenshtein
-
-
-
-
 
 
 def is_4digit_number(s):
@@ -63,6 +58,7 @@ for entry in clean_entries:
         participants[entry[0]].append(entry.copy())
     room_names.add(entry[-1])
 
+#print(len(participants.keys()))
 
 #print(room_names)
 
@@ -157,7 +153,7 @@ fix_dict={
 
 
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 #### fix 
 participants={}
@@ -192,5 +188,107 @@ print(room_names) ### ceck new room name set
 for participant in sorted(list(participants.keys())): 
 
     participants[participant].sort(key=lambda x: x[1]) ### sort entries for each partiucipant based on time
+
+
+
+### save to csv
+data=[]
+header=["part_id","unix_timestamp","room"]
+for participant in sorted(list(participants.keys())): 
+    for entry in participants[participant]:
+        data.append(entry)
+def save_csv(header, data, filename):
+    with open(filename, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        
+        # Write the header
+        csv_writer.writerow(header)
+        
+        # Write the data, replacing None with an empty string
+        for row in data:
+            csv_writer.writerow(['' if cell is None else cell for cell in row])
+
+save_csv(header=header,data=data,filename="tasks/Part_B/fixed.csv")
+
+
+
+###find durations of stay 
+
+#func to check if it's a new day 
+def has_day_changed(timestamp1, timestamp2):  #
+    # Convert Unix timestamps to datetime objects
+    date1 = datetime.utcfromtimestamp(timestamp1).date()
+    date2 = datetime.utcfromtimestamp(timestamp2).date()
+
+    # Compare the day components
+    return date1 != date2
+
+
+def seconds_until_midnight(unix_timestamp):
+    # Convert Unix timestamp to datetime object
+    dt = datetime.utcfromtimestamp(unix_timestamp)
+
+    # Calculate midnight of the next day
+    midnight = datetime(dt.year, dt.month, dt.day) + timedelta(days=1)
+
+    # Calculate the time difference in seconds
+    seconds_remaining = (midnight - dt).total_seconds()
+
+    return int(seconds_remaining)
+
+def seconds_from_start_of_day(unix_timestamp):
+    # Convert Unix timestamp to datetime object
+    dt = datetime.utcfromtimestamp(unix_timestamp)
+
+    # Calculate midnight of the same day
+    start_of_day = datetime(dt.year, dt.month, dt.day)
+
+    # Calculate the time difference in seconds
+    seconds_elapsed = (dt - start_of_day).total_seconds()
+
+    return int(seconds_elapsed)
+
+
+participants_stays={}
+for participant in sorted(list(participants.keys())): 
+
+    moves=participants[participant]
+    stays= {key: 0 for key in room_names}
+    for i,move in enumerate(moves):
+        if i==0:
+            continue
+        if has_day_changed(moves[i][1],moves[i-1][1]):
+            stays[moves[i-1][-1]]+=seconds_until_midnight(moves[i-1][1]) #add to last days room the seconds until end of day
+            stays[moves[i][-1]]+=seconds_from_start_of_day(moves[i][1])  #add to this days first room the seconds from the start of the day
+        else:
+            stays[moves[i-1][-1]]+=int(moves[i][1])-int(moves[i-1][1])
+    participants_stays[participant]=stays.copy()
+
+print(len(list(participants_stays.keys())))
+
+
+#calc percentages of time spent
+new_dataset=[]
+new_header=["part_id"]+sorted(room_names)
+
+for participant in sorted(list(participants_stays.keys())): 
+    total=0
+    for room in sorted(list(participants_stays[participant].keys())):
+        total+=participants_stays[participant][room]
+        #print(total)
+    if total==0:
+        continue
+    
+    new_dataset.append([])
+    new_dataset[-1].append(participant)
+    
+
+    for room in sorted(list(participants_stays[participant].keys())):
+
+        new_dataset[-1].append(int(1000*participants_stays[participant][room]/total)/10)
+
+
+print(new_dataset[0])
+save_csv(header=new_header,data=new_dataset,filename="tasks/Part_B/new_dataset.csv")
 
 
