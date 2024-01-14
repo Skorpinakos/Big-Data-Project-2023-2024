@@ -146,5 +146,5 @@ def run_parallel(times): #run the model training multiple times to evaluate accu
 if __name__ == "__main__":
     parallel_results = run_parallel(8)
     print(parallel_results)
-    print(parallel_results/8)
+    print(sum(parallel_results)/8)
     
