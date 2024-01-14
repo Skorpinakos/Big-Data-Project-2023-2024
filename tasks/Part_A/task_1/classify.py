@@ -18,7 +18,7 @@ def load_to_memory(original_file_path):
 
 
 ### Init
-original_file_path = 'tasks/Part_A/task_1/cleaned_and_filled.csv'
+original_file_path = 'tasks/Part_A/task_1/cleaned_and_filled2.csv'
 #original_file_path = 'tasks/Part_A/task_1/test.csv'
 dataset=load_to_memory(original_file_path=original_file_path)
 #print(dataset[1][0])
@@ -73,52 +73,78 @@ for i in range(1,100):
 print(max(acc))
 
 #now lets use a simple feed forward neural network 
+def model_eval():
+    import numpy as np
+    import tensorflow as tf
+    #tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import LabelEncoder
+    from tensorflow.keras.utils import to_categorical
+    import matplotlib.pyplot as plt
 
-import numpy as np
-import tensorflow as tf
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
-from tensorflow.keras.utils import to_categorical
-import matplotlib.pyplot as plt
-
-# Assuming 'dataset' is your 2D list and 'desired_outputs' is your 1D list
-# X is your feature matrix, and y is your target variable
-features = classifier_input
-labels = classifier_output
-
-
-# Convert your data to NumPy arrays
-features = np.array(features)
-labels = np.array(labels)
-
-# Encode labels to integers
-label_encoder = LabelEncoder()
-encoded_labels = label_encoder.fit_transform(labels)
-
-# Convert integers to one-hot encoding
-one_hot_labels = to_categorical(encoded_labels, num_classes=3)
-
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(features, one_hot_labels, test_size=0.1, random_state=42)
-
-# Build a simple neural network model using TensorFlow for multi-class classification
-model = tf.keras.Sequential([
-    tf.keras.layers.Dense(1024, activation='relu', input_shape=(X_train.shape[1],)),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dense(3, activation='softmax')  # Output layer with softmax for multi-class classification
-])
-
-# Compile the model
-custom_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
+    # Assuming 'dataset' is your 2D list and 'desired_outputs' is your 1D list
+    # X is your feature matrix, and y is your target variable
+    features = classifier_input
+    labels = classifier_output
 
 
-model.compile(optimizer=custom_optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
+    # Convert your data to NumPy arrays
+    features = np.array(features)
+    labels = np.array(labels)
+
+    # Encode labels to integers
+    label_encoder = LabelEncoder()
+    encoded_labels = label_encoder.fit_transform(labels)
+
+    # Convert integers to one-hot encoding
+    one_hot_labels = to_categorical(encoded_labels, num_classes=3)
+
+    # Split the data into training and testing sets
+    X_train, X_test, y_train, y_test = train_test_split(features, one_hot_labels, test_size=0.1, random_state=42)
+
+    # Build a simple neural network model using TensorFlow for multi-class classification
+    model = tf.keras.Sequential([
+        tf.keras.layers.Dense(1024, activation='relu', input_shape=(X_train.shape[1],)),
+        tf.keras.layers.Dense(128, activation='relu'),
+        tf.keras.layers.Dense(3, activation='softmax')  # Output layer with softmax for multi-class classification
+    ])
+
+    # Compile the model
+    custom_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
 
 
-# Store the training history
-history = model.fit(X_train, y_train, epochs=1500, batch_size=64, validation_data=(X_test, y_test))
+    model.compile(optimizer=custom_optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 
-# Evaluate the model on the test set
-loss, accuracy = model.evaluate(X_test, y_test)
-print(f'Test Loss: {loss}')
-print(f'Test Accuracy: {accuracy}')
+
+    # Store the training history
+    history = model.fit(X_train, y_train, epochs=2000, batch_size=64, validation_data=(X_test, y_test),verbose=0)
+
+    # Evaluate the model on the test set
+    loss, accuracy = model.evaluate(X_test, y_test)
+    print(f'Test Loss: {loss}')
+    print(f'Test Accuracy: {accuracy}')
+    return accuracy
+
+import concurrent.futures
+
+
+
+def run_parallel(times): #run the model training multiple times to evaluate accuracy
+    # Number of times to run the function
+    num_runs = times
+
+    # Create a ThreadPoolExecutor with the desired number of workers
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_runs) as executor:
+        # Submit the function for execution in parallel
+        futures = [executor.submit(model_eval) for _ in range(num_runs)]
+
+        # Collect the results as they become available
+        results = [future.result() for future in concurrent.futures.as_completed(futures)]
+
+    return results
+
+if __name__ == "__main__":
+    parallel_results = run_parallel(8)
+    print(parallel_results)
+    print(parallel_results/8)
+    
