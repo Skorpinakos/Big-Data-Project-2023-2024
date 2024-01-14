@@ -26,8 +26,8 @@ dataset=load_to_memory(original_file_path=original_file_path)
 ### 
 
 #### we need to remove the 5 parameters used for establishing the fraility score and the score itself
-#those are the columns : 1,9,10,16,17,18 #starting at 0
-excluded_columns = [1, 9, 10, 16, 17, 18]
+#those are the columns : 1,9,10,16,17,18 #starting at 0, we also remove the id as it is irrelevnt
+excluded_columns = [0,1, 9, 10, 16, 17, 18]
 
 
 classifier_input=[]
@@ -55,7 +55,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_
 
 
 acc=[]
-for i in range(1,20):
+for i in range(1,40):
 
     # Initialize the KNN classifier
     knn_classifier = KNeighborsClassifier(n_neighbors=i)  # You can adjust the number of neighbors (k) as needed
@@ -71,6 +71,7 @@ for i in range(1,20):
     acc.append(accuracy)
     #print(f'Accuracy: {accuracy * 100:.2f}% for {i} nearest neighboors')
 print(sum(acc)/len(acc))
+print(max(acc))
 
 #now lets use a simple feed forward neural network 
 def model_eval():

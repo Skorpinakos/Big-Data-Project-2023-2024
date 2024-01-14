@@ -2,10 +2,6 @@ import csv
 
 
 
-def is_4digit_number(s):
-    return s.isdigit() and len(s) == 4
-
-
 def load_to_memory(original_file_path):
     # Initialize an empty list to store the data
     data_2d_list = []
