@@ -75,7 +75,7 @@ eigenvalues = eigenvalues[sorted_indices]
 eigenvectors = eigenvectors[:, sorted_indices]
 
 # Step 6: Choose the top k eigenvectors
-k = 12  # Choose the desired dimensionality
+k = 8  # Choose the desired dimensionality
 top_eigenvectors = eigenvectors[:, :k]
 
 # Step 7: Form a projection matrix
@@ -89,6 +89,7 @@ reduced_data = np.dot(data/mean, projection_matrix)
 normalized_data = (data)/mean  #this way we equalie the weight of each field to the output
 X=normalized_data
 X=reduced_data
+
 
 error_list=[]
 sil_list=[]
@@ -134,7 +135,7 @@ plt.show()
 #5              #6        0.771
 #6              #6        0.771
 #7              #7        0.697
-#8              #9        0.642
+#8              #9        0.673
 #9              #9        0.641
 #10             #9        0.564
 #11             #9        0.510
