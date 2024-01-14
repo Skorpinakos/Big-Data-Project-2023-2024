@@ -60,9 +60,35 @@ data = np.array([row[1:] for row in entries])
 
 mean = np.mean(data, axis=0)
 
+
+
+
+# Step 3: Compute the covariance matrix
+cov_matrix = np.cov(data/mean, rowvar=False)
+
+# Step 4: Calculate eigenvalues and eigenvectors
+eigenvalues, eigenvectors = np.linalg.eig(cov_matrix)
+
+# Step 5: Sort eigenvalues and corresponding eigenvectors in descending order
+sorted_indices = np.argsort(eigenvalues)[::-1]
+eigenvalues = eigenvalues[sorted_indices]
+eigenvectors = eigenvectors[:, sorted_indices]
+
+# Step 6: Choose the top k eigenvectors
+k = 12  # Choose the desired dimensionality
+top_eigenvectors = eigenvectors[:, :k]
+
+# Step 7: Form a projection matrix
+projection_matrix = top_eigenvectors
+
+# Step 8: Project the original dataset onto the new subspace
+reduced_data = np.dot(data/mean, projection_matrix)
+
+
 # Normalize the dataset
 normalized_data = (data)/mean  #this way we equalie the weight of each field to the output
 X=normalized_data
+X=reduced_data
 
 error_list=[]
 sil_list=[]
@@ -98,5 +124,20 @@ plt.legend()
 # Show the plot
 plt.show()
 
-#from the plot we can visually identify the elbow on n=9 clusters and the corresponding silhoutte index is 0.291
+#without pca: from the plot we can visually identify the elbow on n=9 clusters and the corresponding silhoutte index is 0.291
 
+#by experiementing with pca we gain the following:
+#components  #elbow  #silhouette value
+#2              #2        0.965
+#3              #4        0.775
+#4              #5        0.778
+#5              #6        0.771
+#6              #6        0.771
+#7              #7        0.697
+#8              #9        0.642
+#9              #9        0.641
+#10             #9        0.564
+#11             #9        0.510
+#12             #9        0.472
+
+#At this point we conclude with a 9 centroids clustering and a silhouette index of 0.642 with 8 components
