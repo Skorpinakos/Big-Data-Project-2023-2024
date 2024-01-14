@@ -18,7 +18,7 @@ def load_to_memory(original_file_path):
 
 
 ### Init
-original_file_path = 'tasks/Part_A/task_1/cleaned_and_filled2.csv'
+original_file_path = 'tasks/Part_A/task_1/cleaned_and_filled.csv'
 #original_file_path = 'tasks/Part_A/task_1/test.csv'
 dataset=load_to_memory(original_file_path=original_file_path)
 #print(dataset[1][0])
@@ -144,7 +144,10 @@ def run_parallel(times): #run the model training multiple times to evaluate accu
     return results
 
 if __name__ == "__main__":
-    parallel_results = run_parallel(8)
+    parallel_results = run_parallel(16)
     print(parallel_results)
-    print(sum(parallel_results)/8)
+    print(sum(parallel_results)/16)
+
+    #with predictor dataset 0.6388888955116272 [0.5925925970077515, 0.6851851940155029, 0.6666666865348816, 0.6111111044883728, 0.6111111044883728, 0.5925925970077515, 0.6666666865348816, 0.6851851940155029]
+    #with simple averages   0.6296296268701553 [0.6296296119689941, 0.5740740895271301, 0.7222222089767456, 0.6111111044883728, 0.6111111044883728, 0.6481481194496155, 0.5740740895271301, 0.6666666865348816]
     
