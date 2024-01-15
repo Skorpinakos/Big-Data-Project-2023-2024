@@ -111,10 +111,10 @@ for i in range(2,20):
 import matplotlib.pyplot as plt
 
 # Create a plot with the first list
-plt.plot(error_list, label='WCSS/10000')
+plt.plot(range(2, len(error_list) + 2),error_list, label='WCSS/10000')
 
 # Add the second list to the same plot
-plt.plot(sil_list, label='Silhouette Index')
+plt.plot(range(2, len(error_list) + 2),sil_list, label='Silhouette Index')
 
 # Add labels and a legend
 plt.title('Plot of Two Lists')
@@ -125,7 +125,7 @@ plt.legend()
 # Show the plot
 plt.show()
 
-#without pca: from the plot we can visually identify the elbow on n=9 clusters and the corresponding silhoutte index is 0.291
+#without pca: from the plot we can visually identify the elbow on n=10 clusters and the corresponding silhoutte index is 0.291
 
 #by experiementing with pca we gain the following:
 #components  #elbow  #silhouette value
@@ -141,4 +141,4 @@ plt.show()
 #11             #9        0.510
 #12             #9        0.472
 
-#At this point we conclude with a 9 centroids clustering and a silhouette index of 0.642 with 8 components
+#At this point we conclude with a 10 centroids clustering and a silhouette index of 0.697 with 8 components

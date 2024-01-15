@@ -56,10 +56,6 @@ for row in entries_beacons:
         #print(row,entries_clinical[clinical_index])
         merged_datasets.append(row+entries_clinical[clinical_index][1:])
 
-
-
-
-
 def save_csv(header, data, filename):
     with open(filename, 'w', newline='') as csvfile:
         csv_writer = csv.writer(csvfile)
@@ -72,3 +68,5 @@ def save_csv(header, data, filename):
             csv_writer.writerow(['' if cell is None else cell for cell in row])
 
 save_csv(header=new_header,data=merged_datasets,filename="tasks/Part_B/merged.csv")
+
+

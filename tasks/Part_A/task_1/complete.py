@@ -125,11 +125,6 @@ def predict_cell_value(model, scaler, row, target_column_index):
     return prediction
 
 
-
-
-
-
-
 def fix_rows(rows):
     fixed_rows=[]
     from collections import defaultdict
@@ -172,3 +167,5 @@ final_dataset.sort(key=lambda x: float(x[0]))
 
 
 save_csv(header=header,data=final_dataset,filename="tasks/Part_A/task_1/cleaned_and_filled.csv")
+
+
