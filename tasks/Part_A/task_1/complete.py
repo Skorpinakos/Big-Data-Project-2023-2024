@@ -121,7 +121,7 @@ def predict_cell_value(model, scaler, row, target_column_index):
     # Make the prediction
     prediction = model.predict(features_scaled)[0][0]
     if target_column_index in non_num_fields:
-        return int(prediction)
+        return round(prediction)
     return prediction
 
 
@@ -133,7 +133,6 @@ def fix_rows(rows):
 
     for i,row in enumerate(rows):
         print("Fixing row ",i)
-        #my_row=[1008,2,1,74,10,11.0,0,1,1,1,1,55.0,None,46.0,15.0,0,1,1,1,3.0,0.0,33.95555556,32.7,103,51.4172,11,17,0,0,25,5,3.6,0,3,1,1.0,7.0,630,0.0,0.0,1,1,0,7.4,2,3,5,2,0,0.0,5,25,8,2,2]
         none_indices = [index for index, value in enumerate(row) if value is None] #get indexes where cell is empty
         semi_fixed_row=row.copy()
         for index_i in none_indices: #we fill empty values with avg
